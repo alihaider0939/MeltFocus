@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeltFocus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0,1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161c;
+    --bg-deep:#0b0c10;
+    --panel:#1b1e27;
+    --panel-edge:#2a2f3d;
+    --ink:#ece8de;
+    --ink-dim:#8b8f9c;
+    --ink-faint:#565b6b;
+
+    --wax-hi:#f3e2b3;
+    --wax:#e3c78a;
+    --wax-deep:#a9803f;
+    --wax-shadow:#5f4522;
+
+    --flame-core:#fff4c8;
+    --flame-mid:#ffb648;
+    --flame-outer:#ff7a30;
+
+    --ice-hi:#eafbff;
+    --ice-mid:#a9dbe8;
+    --ice-deep:#4f8faf;
+    --water:#3f7f99;
+    --water-hi:#bfe9f2;
+
+    --amber:#e0954a;
+    --cyan:#6fc7dc;
+
+    --font-display:'Fraunces', Georgia, serif;
+    --font-body:'Inter', -apple-system, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #1e2230 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:56px 20px 80px;
+  }
+
+  header{
+    text-align:center;
+    max-width:620px;
+    margin-bottom:36px;
+  }
+
+  .site-name{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 16px;
+  }
+
+  h1{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-style:italic;
+    font-size:clamp(30px,4.4vw,44px);
+    line-height:1.1;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  /* ---------- setup panel ---------- */
+
+  .setup{
+    width:100%;
+    max-width:440px;
+    background:var(--panel);
+    border:1px solid var(--panel-edge);
+    border-radius:18px;
+    padding:32px 30px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6);
+  }
+
+  .setup-row{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .setup-label{
+    font-size:13px;
+    color:var(--ink-dim);
+    line-height:1.5;
+  }
+
+  .choice-group{
+    display:flex;
+    gap:8px;
+  }
+  .choice-btn{
+    flex:1;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    background:transparent;
+    color:var(--ink-dim);
+    border:1px solid var(--panel-edge);
+    padding:11px 8px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .choice-btn:hover{ border-color:var(--amber); color:var(--ink); }
+  .choice-btn.selected{
+    border-color:var(--amber);
+    background:rgba(224,149,74,.12);
+    color:var(--ink);
+  }
+  .choice-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+  .range-inputs{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .range-block{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .range-block-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    text-align:center;
+  }
+  .hms-stack{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .hms-field{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .hms-field input{
+    background:var(--bg-deep);
+    border:1px solid var(--panel-edge);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:14px;
+    padding:9px 10px;
+    width:100%;
+    min-width:0;
+  }
+  .hms-field input:focus-visible{ outline:2px solid var(--cyan); outline-offset:1px; border-color:var(--cyan); }
+  .hms-field span{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    width:26px;
+    flex-shrink:0;
+  }
+  .range-dash{ color:var(--ink-faint); align-self:center; }
+
+  .setup-error{
+    margin:0;
+    font-size:12.5px;
+    color:#e07a7a;
+    min-height:16px;
+  }
+
+  .primary-btn{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    background:var(--amber);
+    color:#1b1206;
+    border:1px solid var(--amber);
+    padding:14px 30px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:600;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  .primary-btn:hover{ opacity:.9; }
+  .primary-btn:active{ transform:scale(.97); }
+  .primary-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+
+  /* ---------- scenes ---------- */
+
+  .scenes{
+    display:flex;
+    gap:2px;
+    background:var(--panel-edge);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6), 0 0 0 1px var(--panel-edge);
+  }
+
+  .scene{
+    width:380px;
+    background:
+      radial-gradient(ellipse 340px 220px at 50% 100%, var(--scene-glow, rgba(255,255,255,.03)) 0%, transparent 70%),
+      var(--panel);
+    padding:30px 26px 26px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .scene.candle-scene{ --scene-glow: rgba(224,149,74,.08); }
+  .scene.ice-scene{ --scene-glow: rgba(111,199,220,.08); }
+  .scene.is-hidden{ display:none; }
+
+  .scene-head{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:18px;
+  }
+  .scene-title{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-weight:500;
+    font-size:19px;
+  }
+  .scene-tag{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    height:340px;
+    overflow:visible;
+  }
+
+  .table-line{
+    position:absolute;
+    left:-26px; right:-26px;
+    top:270px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--panel-edge) 15%, var(--panel-edge) 85%, transparent);
+  }
+  .table-shadow{
+    position:absolute;
+    left:50%; top:270px;
+    width:260px; height:60px;
+    transform:translate(-50%,-6px);
+    background:radial-gradient(ellipse at center, rgba(0,0,0,.45) 0%, transparent 72%);
+    filter:blur(2px);
+    pointer-events:none;
+  }
+
+  /* ---------- CANDLE ---------- */
+
+  .candle-body{
+    position:absolute;
+    left:50%;
+    width:86px;
+    border-radius:6px 6px 3px 3px;
+    background:
+      linear-gradient(90deg,
+        var(--wax-shadow) 0%, var(--wax-deep) 12%, var(--wax) 30%,
+        var(--wax-hi) 50%, var(--wax) 68%, var(--wax-deep) 86%, var(--wax-shadow) 100%);
+    box-shadow:
+      inset 2px 0 5px rgba(0,0,0,.25),
+      inset -2px 0 5px rgba(0,0,0,.2),
+      0 6px 18px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .candle-rim{
+    position:absolute;
+    left:0; right:0; top:0;
+    height:9px;
+    border-radius:50%/6px;
+    background:radial-gradient(ellipse at center, var(--wax-deep) 0%, var(--wax-shadow) 75%);
+    opacity:.9;
+  }
+  .candle-texture{
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 22px, rgba(0,0,0,.05) 23px, rgba(0,0,0,0) 24px);
+    mix-blend-mode:multiply;
+  }
+
+  .wick{
+    position:absolute;
+    left:50%;
+    width:3px;
+    background:linear-gradient(180deg,#2a2117,#0e0a06);
+    border-radius:2px 2px 0 0;
+    transform:translateX(-50%);
+  }
+  .wick-ember{
+    position:absolute;
+    left:50%; top:-2px;
+    width:5px; height:5px;
+    background:radial-gradient(circle, #ff8a3d, #7a2c00 70%, transparent);
+    border-radius:50%;
+    transform:translateX(-50%);
+    filter:blur(.5px);
+  }
+
+  .flame{
+    position:absolute;
+    left:50%;
+    width:2px; height:2px;
+  }
+  .flame-glow{
+    position:absolute; left:50%; top:50%;
+    width:120px; height:120px;
+    transform:translate(-50%,-58%);
+    background:radial-gradient(circle, rgba(255,150,60,.20) 0%, transparent 65%);
+    pointer-events:none;
+  }
+  .flame-outer,.flame-mid,.flame-core{
+    position:absolute;
+    left:50%; bottom:0;
+    transform:translateX(-50%);
+    border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;
+  }
+  .flame-outer{
+    width:28px; height:42px;
+    background:radial-gradient(circle at 50% 78%, var(--flame-outer) 0%, rgba(255,90,20,0) 72%);
+    filter:blur(1.4px);
+    mix-blend-mode:screen;
+    opacity:.85;
+  }
+  .flame-mid{
+    width:18px; height:29px;
+    background:radial-gradient(circle at 50% 82%, var(--flame-mid) 0%, rgba(255,150,40,0) 75%);
+    mix-blend-mode:screen;
+  }
+  .flame-core{
+    width:7px; height:13px;
+    background:radial-gradient(circle at 50% 85%, var(--flame-core) 0%, var(--flame-mid) 85%);
+  }
+
+  .drip{
+    position:absolute;
+    width:6px;
+    background:linear-gradient(180deg, var(--wax-hi), var(--wax) 40%, var(--wax-deep));
+    border-radius:50% 50% 45% 45% / 60% 60% 40% 40%;
+    box-shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+
+  .wax-puddle{
+    position:absolute;
+    left:50%; top:266px;
+    width:210px; height:34px;
+    transform:translate(-50%,0) scale(0.2,0.2);
+    transform-origin:50% 100%;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse 60% 55% at 40% 30%, var(--wax-hi) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, var(--wax) 0%, var(--wax-deep) 75%, var(--wax-shadow) 100%);
+    box-shadow:0 8px 20px rgba(0,0,0,.4);
+  }
+
+  /* ---------- ICE ---------- */
+
+  .ice-wrap{
+    position:absolute;
+    left:50%;
+    top:130px;
+    width:150px;
+    height:130px;
+    transform-origin:50% 100%;
+  }
+  .ice-cube{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(125deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.06) 30%, rgba(80,150,180,.28) 55%, rgba(40,100,130,.42) 100%),
+      linear-gradient(200deg, var(--ice-hi), var(--ice-mid) 45%, var(--ice-deep) 100%);
+    box-shadow:
+      inset 0 0 22px rgba(255,255,255,.35),
+      inset 0 -14px 26px rgba(30,80,110,.35);
+  }
+  .ice-highlight{
+    position:absolute;
+    left:14%; top:10%;
+    width:34%; height:26%;
+    background:radial-gradient(ellipse at center, rgba(255,255,255,.75) 0%, transparent 72%);
+    border-radius:50%;
+    filter:blur(1px);
+  }
+  .crack{
+    position:absolute;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), rgba(255,255,255,.1), transparent);
+    height:1.5px;
+  }
+  .crack1{ width:58%; top:38%; left:18%; transform:rotate(18deg); }
+  .crack2{ width:38%; top:62%; left:12%; transform:rotate(-12deg); }
+  .crack3{ width:30%; top:24%; left:50%; transform:rotate(58deg); }
+
+  .droplet{
+    position:absolute;
+    width:6px; height:9px;
+    background:radial-gradient(circle at 32% 30%, var(--ice-hi), var(--cyan) 65%, var(--water) 100%);
+    border-radius:50% 50% 50% 50% / 65% 65% 35% 35%;
+    box-shadow:0 0 3px rgba(160,230,240,.5);
+  }
+
+  .water-puddle{
+    position:absolute;
+    left:50%; top:266px;
+    width:190px; height:30px;
+    transform:translate(-50%,0) scale(0.15,0.15);
+    transform-origin:50% 100%;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse 55% 50% at 38% 28%, var(--water-hi) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, var(--cyan) 0%, var(--water) 70%, #244a58 100%);
+    box-shadow:0 8px 22px rgba(10,40,55,.5);
+    opacity:.92;
+  }
+
+  .ripple{
+    position:absolute;
+    width:16px; height:6px;
+    border:1px solid rgba(230,250,255,.55);
+    border-radius:50%;
+    transform:translate(-50%,-50%) scale(.3);
+    opacity:.7;
+    animation:rippleGrow 750ms ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes rippleGrow{
+    to{ transform:translate(-50%,-50%) scale(2.1); opacity:0; }
+  }
+
+  /* ---------- caption / controls ---------- */
+
+  .caption{
+    margin-top:20px;
+    font-size:13px;
+    color:var(--ink-dim);
+    min-height:18px;
+    text-align:center;
+    font-style:italic;
+    font-family:var(--font-display);
+  }
+  .candle-scene .caption{ color:#d9b98a; }
+  .ice-scene .caption{ color:#9fd3e2; }
+
+  .controls{
+    margin-top:40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+  .controls-buttons{
+    display:flex;
+    gap:10px;
+  }
+
+  button{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--panel-edge);
+    padding:13px 30px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease, transform .1s ease;
+  }
+  button:hover{ border-color:var(--amber); background:rgba(224,149,74,.08); }
+  button:active{ transform:scale(.97); }
+  button:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+  button:disabled{ opacity:.4; cursor:default; }
+  button:disabled:hover{ border-color:var(--panel-edge); background:transparent; }
+
+  .hint{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--ink-faint);
+    letter-spacing:.04em;
+    text-align:center;
+    max-width:360px;
+  }
+
+  .hidden{ display:none !important; }
+
+  @media (max-width:820px){
+    .scenes{ flex-direction:column; border-radius:18px; }
+    .scene{ width:100%; max-width:380px; }
+  }
+  @media (max-width:480px){
+    .stage{ transform:scale(.86); transform-origin:top center; margin-bottom:-46px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ripple{ animation-duration:1ms; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="site-name">MeltFocus</p>
+  <h1>Everything softens, eventually.</h1>
+</header>
+
+<div class="setup" id="setupPanel">
+  <div class="setup-row">
+    <label class="setup-label" id="choiceLabel">What do you want to watch melt?</label>
+    <div class="choice-group" id="choiceGroup" role="group" aria-labelledby="choiceLabel">
+      <button type="button" class="choice-btn" data-choice="candle">Candle</button>
+      <button type="button" class="choice-btn" data-choice="ice">Ice</button>
+      <button type="button" class="choice-btn selected" data-choice="both">Both</button>
+    </div>
+  </div>
+
+  <div class="setup-row">
+    <label class="setup-label" id="rangeLabel">Give a time range. A duration is chosen at random somewhere within it — including the two ends you set — and kept hidden.</label>
+    <div class="range-inputs">
+      <div class="range-block">
+        <span class="range-block-label">Min</span>
+        <div class="hms-stack">
+          <div class="hms-field">
+            <input type="number" id="minHours" value="0" min="0" step="1" inputmode="numeric" aria-label="Min hours">
+            <span>hr</span>
+          </div>
+          <div class="hms-field">
+            <input type="number" id="minMinutes" value="1" min="0" max="59" step="1" inputmode="numeric" aria-label="Min minutes">
+            <span>min</span>
+          </div>
+          <div class="hms-field">
+            <input type="number" id="minSeconds" value="0" min="0" max="59" step="1" inputmode="numeric" aria-label="Min seconds">
+            <span>sec</span>
+          </div>
+        </div>
+      </div>
+      <span class="range-dash">—</span>
+      <div class="range-block">
+        <span class="range-block-label">Max</span>
+        <div class="hms-stack">
+          <div class="hms-field">
+            <input type="number" id="maxHours" value="0" min="0" step="1" inputmode="numeric" aria-label="Max hours">
+            <span>hr</span>
+          </div>
+          <div class="hms-field">
+            <input type="number" id="maxMinutes" value="3" min="0" max="59" step="1" inputmode="numeric" aria-label="Max minutes">
+            <span>min</span>
+          </div>
+          <div class="hms-field">
+            <input type="number" id="maxSeconds" value="0" min="0" max="59" step="1" inputmode="numeric" aria-label="Max seconds">
+            <span>sec</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="setup-error" id="setupError"></p>
+
+  <button id="startBtn" class="primary-btn">Begin melting</button>
+</div>
+
+<div class="scenes hidden" id="scenesWrap">
+
+  <section class="scene candle-scene" id="candleScene" aria-label="Melting candle simulation">
+    <div class="scene-head">
+      <span class="scene-title">Paraffin</span>
+      <span class="scene-tag">flame &amp; wax</span>
+    </div>
+
+    <div class="stage" id="candleStage">
+      <div class="table-shadow"></div>
+      <div class="table-line"></div>
+
+      <div class="wax-puddle" id="waxPuddle"></div>
+
+      <div class="candle-body" id="candleBody">
+        <div class="candle-rim"></div>
+        <div class="candle-texture"></div>
+      </div>
+
+      <div class="wick" id="wick"><div class="wick-ember" id="wickEmber"></div></div>
+
+      <div class="flame" id="flame">
+        <div class="flame-glow"></div>
+        <div class="flame-outer"></div>
+        <div class="flame-mid"></div>
+        <div class="flame-core"></div>
+      </div>
+
+      <div id="drips"></div>
+    </div>
+
+    <p class="caption" id="candleCaption">freshly lit</p>
+  </section>
+
+  <section class="scene ice-scene" id="iceScene" aria-label="Melting ice cube simulation">
+    <div class="scene-head">
+      <span class="scene-title">Ice</span>
+      <span class="scene-tag">frozen &amp; fading</span>
+    </div>
+
+    <div class="stage" id="iceStage">
+      <div class="table-shadow"></div>
+      <div class="table-line"></div>
+
+      <div class="water-puddle" id="waterPuddle"></div>
+
+      <div class="ice-wrap" id="iceWrap">
+        <div class="ice-cube" id="iceCube">
+          <div class="ice-highlight"></div>
+          <div class="crack crack1"></div>
+          <div class="crack crack2"></div>
+          <div class="crack crack3"></div>
+        </div>
+      </div>
+
+      <div id="droplets"></div>
+    </div>
+
+    <p class="caption" id="iceCaption">freshly cut, edges sharp</p>
+  </section>
+
+</div>
+
+<div class="controls hidden" id="controlsWrap">
+  <div class="controls-buttons">
+    <button id="mainBtn">Melting…</button>
+    <button id="changeBtn">Change settings</button>
+  </div>
+  <p class="hint" id="hintText">The duration is randomized within your given range and hidden. Watch the object, not a clock.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- shared noise helper ----------
+  function makeWobble(count){
+    count = count || 3;
+    var parts = [];
+    for(var i=0;i<count;i++){
+      parts.push({
+        freq: 0.25 + Math.random()*1.3,
+        phase: Math.random()*Math.PI*2,
+        amp: 1/(i+1)
+      });
+    }
+    var norm = parts.reduce(function(s,p){return s+p.amp;},0);
+    return function(t){
+      var v=0;
+      for(var i=0;i<parts.length;i++){
+        v += Math.sin(t*parts[i].freq + parts[i].phase)*parts[i].amp;
+      }
+      return v/norm; // -1..1
+    };
+  }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  // ---------- layout constants ----------
+  var TABLE_Y = 270;
+  var CANDLE_MAX_H = 176;
+  var CANDLE_W = 86;
+  var WICK_MAX = 20;
+  var ICE_W = 150, ICE_H = 130;
+
+  // ---------- setup DOM ----------
+  var setupPanel = document.getElementById('setupPanel');
+  var choiceGroup = document.getElementById('choiceGroup');
+  var choiceButtons = Array.prototype.slice.call(choiceGroup.querySelectorAll('.choice-btn'));
+  var minHoursInput = document.getElementById('minHours');
+  var minMinutesInput = document.getElementById('minMinutes');
+  var minSecondsInput = document.getElementById('minSeconds');
+  var maxHoursInput = document.getElementById('maxHours');
+  var maxMinutesInput = document.getElementById('maxMinutes');
+  var maxSecondsInput = document.getElementById('maxSeconds');
+  var setupError = document.getElementById('setupError');
+  var startBtn = document.getElementById('startBtn');
+
+  var scenesWrap = document.getElementById('scenesWrap');
+  var candleScene = document.getElementById('candleScene');
+  var iceScene = document.getElementById('iceScene');
+  var controlsWrap = document.getElementById('controlsWrap');
+  var mainBtn = document.getElementById('mainBtn');
+  var changeBtn = document.getElementById('changeBtn');
+  var hintText = document.getElementById('hintText');
+
+  var selectedChoice = 'both';
+  choiceButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      choiceButtons.forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selectedChoice = btn.getAttribute('data-choice');
+    });
+  });
+
+  // ---------- scene DOM ----------
+  var candleBody = document.getElementById('candleBody');
+  var wick = document.getElementById('wick');
+  var wickEmber = document.getElementById('wickEmber');
+  var flame = document.getElementById('flame');
+  var waxPuddle = document.getElementById('waxPuddle');
+  var dripsHost = document.getElementById('drips');
+  var candleCaption = document.getElementById('candleCaption');
+
+  var iceWrap = document.getElementById('iceWrap');
+  var iceCube = document.getElementById('iceCube');
+  var waterPuddle = document.getElementById('waterPuddle');
+  var dropletsHost = document.getElementById('droplets');
+  var iceCaption = document.getElementById('iceCaption');
+
+  candleBody.style.width = CANDLE_W+'px';
+  iceWrap.style.width = ICE_W+'px';
+  iceWrap.style.height = ICE_H+'px';
+  iceWrap.style.top = (TABLE_Y-ICE_H)+'px';
+
+  // ---------- flame wobble generators ----------
+  var flameWobbles = {
+    rot: makeWobble(3),
+    sx: makeWobble(3),
+    sy: makeWobble(3),
+    tx: makeWobble(4),
+    glow: makeWobble(2)
+  };
+
+  // ---------- ice vertex noise (superellipse boundary) ----------
+  var ICE_POINTS = 26;
+  var iceVertexNoise = [];
+  for(var vi=0; vi<ICE_POINTS; vi++){
+    iceVertexNoise.push(makeWobble(2));
+  }
+
+  function buildIceClipPath(p, tSec){
+    var n = 5.4 - 3.0*p;
+    var baseNoise = (reducedMotion? 0.4 : 1) * (4 + 24*p);
+    var pts = [];
+    for(var i=0;i<ICE_POINTS;i++){
+      var ang = (i/ICE_POINTS)*Math.PI*2;
+      var cx = Math.cos(ang), cy = Math.sin(ang);
+      var ex = Math.sign(cx)*Math.pow(Math.abs(cx), 2/n);
+      var ey = Math.sign(cy)*Math.pow(Math.abs(cy), 2/n);
+      var bottomBias = 1 + 0.45*Math.max(0, cy);
+      var noiseVal = iceVertexNoise[i](tSec*0.35) * baseNoise * bottomBias * p;
+      var radiusMul = 1 - clamp(noiseVal,0,60)/100;
+      var px = 50 + ex*radiusMul*50;
+      var py = 50 + ey*radiusMul*50;
+      px = clamp(px,0,100); py = clamp(py,0,100);
+      pts.push(px.toFixed(1)+'% '+py.toFixed(1)+'%');
+    }
+    return 'polygon(' + pts.join(',') + ')';
+  }
+
+  // ---------- captions ----------
+  function candleLabel(p){
+    if(p<0.02) return 'freshly lit';
+    if(p<0.28) return 'burning steadily';
+    if(p<0.58) return 'wax pooling at the base';
+    if(p<0.85) return 'guttering low';
+    if(p<0.995) return 'nearly spent';
+    return 'burned out — only the wick remains';
+  }
+  function iceLabel(p){
+    if(p<0.02) return 'freshly cut, edges sharp';
+    if(p<0.28) return 'sweating in the warmth';
+    if(p<0.58) return 'edges rounding, losing form';
+    if(p<0.85) return 'collapsing into itself';
+    if(p<0.995) return 'a sliver remains';
+    return 'gone — only water remains';
+  }
+
+  // ---------- drip / droplet pools ----------
+  var drips = [];
+  var nextDripAt = Infinity;
+  var droplets = [];
+  var nextDropletAt = Infinity;
+
+  function scheduleNextDrip(nowSec){
+    nextDripAt = nowSec + 1.0 + Math.random()*2.2;
+  }
+  function scheduleNextDroplet(nowSec){
+    nextDropletAt = nowSec + 1.4 + Math.random()*2.6;
+  }
+
+  function spawnDrip(candleTopY){
+    var el = document.createElement('div');
+    el.className = 'drip';
+    var x = (Math.random()-0.5) * CANDLE_W * 0.7;
+    var d = {
+      el: el,
+      x: x,
+      top: candleTopY + Math.random()*10,
+      height: 0,
+      targetHeight: 16 + Math.random()*22,
+      phase: 'forming',
+      formT: 0,
+      speed: 6 + Math.random()*5,
+      settleY: TABLE_Y - 4
+    };
+    el.style.left = 'calc(50% + ' + x.toFixed(1) + 'px)';
+    el.style.transform = 'translateX(-50%)';
+    dripsHost.appendChild(el);
+    drips.push(d);
+    if(drips.length > 14){
+      var old = drips.shift();
+      if(old.el.parentNode) old.el.parentNode.removeChild(old.el);
+    }
+  }
+
+  function spawnDroplet(cubeBottomY, cubeHalfWidth){
+    var el = document.createElement('div');
+    el.className = 'droplet';
+    var x = (Math.random()-0.5) * cubeHalfWidth * 1.6;
+    var d = {
+      el: el,
+      x: x,
+      y: cubeBottomY - 2,
+      vy: 8,
+      settleY: TABLE_Y - 6
+    };
+    dropletsHost.appendChild(el);
+    droplets.push(d);
+    if(droplets.length > 10){
+      var old = droplets.shift();
+      if(old.el.parentNode) old.el.parentNode.removeChild(old.el);
+    }
+  }
+
+  function spawnRipple(x,y,host){
+    var r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = x+'px';
+    r.style.top = y+'px';
+    host.appendChild(r);
+    setTimeout(function(){ if(r.parentNode) r.parentNode.removeChild(r); }, 800);
+  }
+
+  // ---------- state ----------
+  var running = false;
+  var startTime = 0;
+  var duration = 60;
+  var visualP = 0;
+  var settled = false;
+  var showCandle = true, showIce = true;
+  var rangeMinSec = 60, rangeMaxSec = 180;
+
+  function clearDynamicEls(){
+    drips.forEach(function(d){ if(d.el.parentNode) d.el.parentNode.removeChild(d.el); });
+    droplets.forEach(function(d){ if(d.el.parentNode) d.el.parentNode.removeChild(d.el); });
+    drips = []; droplets = [];
+    nextDripAt = Infinity;
+    nextDropletAt = Infinity;
+  }
+
+  function resetVisuals(){
+    clearDynamicEls();
+    visualP = 0;
+    settled = false;
+    renderCandle(0,0);
+    renderIce(0,0);
+  }
+
+  function begin(){
+    duration = rangeMinSec + Math.random()*(rangeMaxSec-rangeMinSec); // hidden, never displayed
+    startTime = performance.now();
+    running = true;
+    settled = false;
+    scheduleNextDrip(0);
+    scheduleNextDroplet(0);
+    mainBtn.textContent = 'Melting…';
+    mainBtn.disabled = true;
+    hintText.textContent = 'The duration is randomized within your given range and hidden. Watch the object, not a clock.';
+  }
+
+  function toSeconds(h,m,s){
+    return (h||0)*3600 + (m||0)*60 + (s||0);
+  }
+
+  function validateRange(){
+    var mh = parseFloat(minHoursInput.value), mm = parseFloat(minMinutesInput.value), ms = parseFloat(minSecondsInput.value);
+    var xh = parseFloat(maxHoursInput.value), xm = parseFloat(maxMinutesInput.value), xs = parseFloat(maxSecondsInput.value);
+    var parts = [mh,mm,ms,xh,xm,xs];
+    for(var i=0;i<parts.length;i++){
+      if(isNaN(parts[i]) || parts[i] < 0){
+        setupError.textContent = 'Enter valid, non-negative hours, minutes, and seconds.';
+        return null;
+      }
+    }
+    var min = toSeconds(mh,mm,ms);
+    var max = toSeconds(xh,xm,xs);
+    if(min < 1 || max < 1){
+      setupError.textContent = 'The range needs to add up to at least 1 second.';
+      return null;
+    }
+    if(min > max){
+      setupError.textContent = 'The Min duration can\'t be greater than the Max duration.';
+      return null;
+    }
+    setupError.textContent = '';
+    return { min: min, max: max };
+  }
+
+  startBtn.addEventListener('click', function(){
+    var range = validateRange();
+    if(!range) return;
+    rangeMinSec = range.min;
+    rangeMaxSec = range.max;
+
+    showCandle = (selectedChoice === 'candle' || selectedChoice === 'both');
+    showIce = (selectedChoice === 'ice' || selectedChoice === 'both');
+    candleScene.classList.toggle('is-hidden', !showCandle);
+    iceScene.classList.toggle('is-hidden', !showIce);
+
+    setupPanel.classList.add('hidden');
+    scenesWrap.classList.remove('hidden');
+    controlsWrap.classList.remove('hidden');
+
+    resetVisuals();
+    begin();
+  });
+
+  mainBtn.addEventListener('click', function(){
+    if(settled){
+      resetVisuals();
+      begin();
+    }
+  });
+
+  changeBtn.addEventListener('click', function(){
+    running = false;
+    settled = false;
+    clearDynamicEls();
+    scenesWrap.classList.add('hidden');
+    controlsWrap.classList.add('hidden');
+    setupPanel.classList.remove('hidden');
+    mainBtn.textContent = 'Melting…';
+    mainBtn.disabled = true;
+  });
+
+  // ---------- render: candle ----------
+  function renderCandle(p, tSec){
+    var fadeStart = 0.94;
+    var flameFade = p < fadeStart ? 1 : clamp(1-(p-fadeStart)/(1-fadeStart), 0, 1);
+
+    var candleH = Math.max(0, CANDLE_MAX_H * (1 - p));
+    var wickVisible = WICK_MAX * (1 - 0.35*p);
+    var candleTop = TABLE_Y - candleH;
+
+    candleBody.style.top = candleTop + 'px';
+    candleBody.style.height = candleH + 'px';
+
+    var wickTop = candleTop - wickVisible;
+    wick.style.top = wickTop + 'px';
+    wick.style.height = wickVisible + 'px';
+    wickEmber.style.opacity = flameFade > 0.05 ? '1' : '0.15';
+
+    var flameScale = (1 - 0.28*p) * (0.55 + 0.45*flameFade);
+    var jr = flameWobbles.rot(tSec*1.6) * 5;
+    var jsx = 1 + flameWobbles.sx(tSec*2.1) * 0.06;
+    var jsy = 1 + flameWobbles.sy(tSec*1.7) * 0.09;
+    var jtx = flameWobbles.tx(tSec*1.3) * 3;
+
+    var flameBaseY = wickTop - 2;
+    flame.style.top = flameBaseY + 'px';
+    flame.style.left = 'calc(50% + ' + jtx.toFixed(2) + 'px)';
+    flame.style.transform = 'scale(' + (flameScale*jsx).toFixed(3) + ',' + (flameScale*jsy).toFixed(3) + ') rotate(' + jr.toFixed(2) + 'deg)';
+    flame.style.opacity = flameFade.toFixed(2);
+    flame.style.transformOrigin = '50% 100%';
+
+    var waxScale = clamp(0.18 + 0.86*p, 0.18, 1.06);
+    var wobbleP = 1 + flameWobbles.sx(tSec*0.6)*0.01;
+    waxPuddle.style.transform = 'translate(-50%,0) scale(' + (waxScale*wobbleP).toFixed(3) + ',' + (waxScale*0.9).toFixed(3) + ')';
+
+    if(running && !settled && p < 0.92 && tSec >= nextDripAt){
+      spawnDrip(candleTop);
+      scheduleNextDrip(tSec);
+    }
+    for(var i=drips.length-1;i>=0;i--){
+      var d = drips[i];
+      if(d.phase === 'forming'){
+        d.formT += 1/60;
+        d.height = lerp(0, d.targetHeight, clamp(d.formT/0.5,0,1));
+        if(d.formT >= 0.5) d.phase = 'sliding';
+      } else if(d.phase === 'sliding'){
+        d.top += d.speed * 0.15;
+        if(d.top + d.height >= d.settleY){
+          d.top = d.settleY - d.height;
+          d.phase = 'done';
+        }
+      }
+      d.el.style.top = d.top + 'px';
+      d.el.style.height = d.height + 'px';
+    }
+
+    candleCaption.textContent = (running || settled) ? candleLabel(p) : 'freshly lit';
+  }
+
+  // ---------- render: ice ----------
+  function renderIce(p, tSec){
+    var iceFadeStart = 0.9;
+    var iceFade = p < iceFadeStart ? 1 : clamp(1-(p-iceFadeStart)/(1-iceFadeStart), 0, 1);
+
+    var wob1 = 1 + flameWobbles.sx(tSec*0.5+10)*0.015;
+    var wob2 = 1 + flameWobbles.sy(tSec*0.45+4)*0.015;
+    var scaleX = clamp((1 - 0.80*p) * wob1, 0.04, 1);
+    var scaleY = clamp((1 - 0.86*p) * wob2, 0.04, 1);
+
+    iceWrap.style.transform = 'translateX(-50%) scale(' + scaleX.toFixed(3) + ',' + scaleY.toFixed(3) + ')';
+    var iceOpacity = clamp((0.92 - 0.5*p) * iceFade, 0, 1);
+    iceCube.style.opacity = iceOpacity.toFixed(2);
+    iceCube.style.clipPath = buildIceClipPath(p, tSec);
+
+    var cubeBottomY = TABLE_Y;
+    var cubeHalfWidth = (ICE_W*scaleX)/2;
+
+    if(running && !settled && p < 0.95 && tSec >= nextDropletAt){
+      spawnDroplet(cubeBottomY, cubeHalfWidth);
+      scheduleNextDroplet(tSec);
+    }
+    for(var j=droplets.length-1;j>=0;j--){
+      var dr = droplets[j];
+      dr.vy += 26/60;
+      dr.y += dr.vy/60*10;
+      dr.el.style.left = 'calc(50% + ' + dr.x.toFixed(1) + 'px)';
+      dr.el.style.top = dr.y.toFixed(1) + 'px';
+      if(dr.y >= dr.settleY){
+        spawnRipple(190 + dr.x, dr.settleY+4, dropletsHost);
+        if(dr.el.parentNode) dr.el.parentNode.removeChild(dr.el);
+        droplets.splice(j,1);
+      }
+    }
+
+    var waterScale = clamp(0.12 + 0.92*p, 0.12, 1.05);
+    waterPuddle.style.transform = 'translate(-50%,0) scale(' + (waterScale*wob1).toFixed(3) + ',' + (waterScale*0.9).toFixed(3) + ')';
+
+    iceCaption.textContent = (running || settled) ? iceLabel(p) : 'freshly cut, edges sharp';
+  }
+
+  // ---------- main loop ----------
+  function frame(now){
+    var tSecReal = now/1000;
+    if(running){
+      var elapsed = (now - startTime)/1000;
+      var raw = clamp(elapsed/duration, 0, 1);
+      visualP += (raw - visualP) * 0.08;
+      if(raw >= 1 && visualP > 0.995){
+        visualP = 1;
+        if(!settled){
+          settled = true;
+          running = false;
+          mainBtn.textContent = 'Melt again';
+          mainBtn.disabled = false;
+          hintText.textContent = 'That was one full cycle of the hidden timer.';
+        }
+      }
+    }
+    if(showCandle) renderCandle(visualP, tSecReal);
+    if(showIce) renderIce(visualP, tSecReal);
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
